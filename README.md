@@ -1,30 +1,66 @@
-[SOC] Mini SOC Dashboard - Infrastructure Kubernetes
+<div align="center">
 
-Ce projet est une plateforme de gestion de logs de securite (SOC) deployee sur un cluster Kubernetes local (Minikube). Il permet de collecter, stocker (MySQL) et visualiser des evenements reseau via une architecture micro-services securisee et resiliente.
+# 🛡️ Mini SOC Dashboard
+### Plateforme de gestion de logs de sécurité sur Kubernetes
 
-Architecture
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Minikube-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![React](https://img.shields.io/badge/Frontend-React.js-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Nginx](https://img.shields.io/badge/Gateway-Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
 
-Frontend : React.js servi par Nginx.
+</div>
 
-Backend : Node.js Express (API REST).
+---
 
-Base de donnees : MySQL 8.0 pour la persistance.
+## 📋 Table des matières
 
-Ingress : Nginx Ingress Controller (Gateway).
+- [Vue d'ensemble](#-vue-densemble)
+- [Architecture](#-architecture)
+- [Prérequis](#-prérequis)
+- [Déploiement rapide](#-déploiement-rapide)
+- [Déploiement manuel](#-déploiement-manuel)
+- [Gestion des images Docker](#-gestion-des-images-docker)
+- [Sécurité et résilience](#-sécurité-et-résilience)
+- [Accès à l'application](#-accès-à-lapplication)
 
-Securite : Controle d'acces base sur les roles (RBAC) et gestion des Secrets.
+---
 
-Schema des flux :
+## 🔍 Vue d'ensemble
 
+Ce projet est une plateforme **SOC (Security Operations Center)** déployée sur un cluster Kubernetes local (**Minikube**). Il permet de :
+
+- 📥 **Collecter** des événements réseau et des logs de sécurité
+- 🗄️ **Stocker** les données de manière persistante via MySQL
+- 📊 **Visualiser** les événements via une interface React moderne
+- 🔐 **Sécuriser** les accès grâce au RBAC Kubernetes
+
+---
+
+## 🏗️ Architecture
+
+### Stack technique
+
+| Composant | Technologie | Port |
+|-----------|-------------|------|
+| **Frontend** | React.js servi par Nginx | `80` |
+| **Backend** | Node.js / Express (API REST) | `8000` |
+| **Base de données** | MySQL 8.0 | `3306` |
+| **Gateway** | Nginx Ingress Controller | — |
+| **Sécurité** | RBAC + Kubernetes Secrets | — |
+
+### Schéma des flux
+
+```
 ┌──────────────────────────────────────────────────────────┐
 │                   KUBERNETES (Minikube)                  │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │      NGINX Ingress Controller (Gateway)             │  │
+│  │      NGINX Ingress Controller (Gateway)            │  │
 │  │  ┌──────────────────────────────────────────────┐  │  │
 │  │  │ Routage :                                    │  │  │
-│  │  │ - /    → frontend-service (port 80)          │  │  │
-│  │  │ - /api → backend-service  (port 8000)        │  │  │
+│  │  │  /     →  frontend-service  (port 80)        │  │  │
+│  │  │  /api  →  backend-service   (port 8000)      │  │  │
 │  │  └──────────────────────────────────────────────┘  │  │
 │  └────────────────────────────────────────────────────┘  │
 │                 │                        │               │
@@ -44,118 +80,189 @@ Schema des flux :
 │                                │ + PersistentVol  │      │
 │                                └──────────────────┘      │
 └──────────────────────────────────────────────────────────┘
+```
 
-Guide de deploiement
+---
 
-Lancement Rapide (Automatisation)
+## ✅ Prérequis
 
-1. Deploiement complet
+Avant de commencer, assurez-vous d'avoir installé les outils suivants :
 
-Ce script demarre Minikube (avec Ingress), configure le demon Docker, build les images du SOC et deploie l'infrastructure complete (Deployments, Services, PVC, RBAC).
+| Outil | Description | Lien |
+|-------|-------------|------|
+| 🐳 **Docker Desktop** | Moteur de conteneurs | [Installer](https://www.docker.com/products/docker-desktop) |
+| ☸️ **Minikube** | Cluster Kubernetes local | [Installer](https://minikube.sigs.k8s.io/docs/start/) |
+| 🔧 **kubectl** | CLI Kubernetes | [Installer](https://kubernetes.io/docs/tasks/tools/) |
 
-Sur Windows (PowerShell) :
+---
 
+## 🚀 Déploiement rapide
+
+> Scripts d'automatisation : démarrage Minikube, build des images, et déploiement complet en une seule commande.
+
+### 1️⃣ Déploiement complet
+
+<details>
+<summary><b>🪟 Windows (PowerShell)</b></summary>
+
+```powershell
 ./deploy.ps1
+```
 
+</details>
 
-Sur Linux / macOS :
+<details>
+<summary><b>🐧 Linux / macOS</b></summary>
 
+```bash
 chmod +x deploy.sh
 ./deploy.sh
+```
 
+</details>
 
-Note importante : Une fois le deploiement termine, n'oubliez pas d'ouvrir un terminal dedie et de lancer la commande "minikube tunnel" pour rendre l'interface accessible sur votre navigateur a l'adresse http://localhost.
+> [!IMPORTANT]
+> Une fois le déploiement terminé, ouvrez un **terminal dédié** et lancez :
+> ```bash
+> minikube tunnel
+> ```
+> L'interface sera alors accessible sur → **http://localhost**
 
-2. Nettoyage (garde la persistance)
+---
 
-Ce script supprime proprement les ressources Kubernetes (Pods, Services, Ingress, Secrets) mais conserve vos logs dans le volume MySQL.
+### 2️⃣ Nettoyage (avec conservation des données)
 
-Sur Windows (PowerShell) :
+Supprime les ressources Kubernetes mais **conserve les logs** dans le volume MySQL.
 
+```powershell
+# Windows
 ./cleanup.ps1
+```
 
+---
 
-3. Nettoyage total
+### 3️⃣ Nettoyage total
 
-Ce script supprime toutes les ressources Kubernetes ainsi que les donnees en persistance sur la Base de Donnees (PVC).
+Supprime **toutes les ressources**, y compris le PVC et les données persistantes.
 
-Sur Windows (PowerShell) :
-
+```powershell
+# Windows
 ./cleanup-total.ps1
+```
 
+> [!WARNING]
+> Le nettoyage total supprime définitivement toutes les données de la base MySQL. Cette action est irréversible.
 
-Lancement Manuel (Pas a pas)
+---
 
-1. Prerequis
+## 🔧 Déploiement manuel
 
-Assurez-vous d'avoir installe :
+### Étape 1 — Démarrage de l'environnement
 
-Docker Desktop
-
-Minikube
-
-kubectl
-
-2. Demarrage de l'environnement
-
+```bash
 minikube start
 minikube addons enable ingress
+```
 
+### Étape 2 — Build des images Docker en local
 
-3. Preparation des images Docker (Locale)
+Pour utiliser vos images **sans passer par Docker Hub**, buildez-les directement dans le démon Docker de Minikube :
 
-Pour utiliser vos images sans passer par Docker Hub, buildez-les directement dans le demon Docker de Minikube :
-
-Sur Windows (PowerShell) :
-
+```powershell
+# Windows (PowerShell) — pointer Docker vers Minikube
 & minikube -p minikube docker-env --shell powershell | Invoke-Expression
+```
 
+Puis buildez les images :
 
-Ensuite, buildez les images :
-
+```bash
 # Build du Backend
 docker build -t backend-service:latest ./backend
 
 # Build du Frontend
 docker build -t frontend-service:latest ./frontend
+```
 
+### Étape 3 — Déploiement des micro-services
 
-4. Deploiement des micro-services
-
+```bash
 kubectl apply -f k8s/
+```
 
+---
 
-Gestion des Images (Docker Hub vs Local)
+## 🐋 Gestion des images Docker
 
-Par defaut, les fichiers YAML pointent vers les images sur Docker Hub :
+### Images Docker Hub (par défaut)
 
-chahrazedbouacida/backend-soc:v1
+Les fichiers YAML pointent par défaut vers les images publiques :
 
-chahrazedbouacida/frontend-soc:v1
+```yaml
+image: chahrazedbouacida/backend-soc:v1
+image: chahrazedbouacida/frontend-soc:v1
+```
 
-Pour utiliser vos images locales :
+### Passer en images locales
 
-Modifiez la ligne "image:" dans les fichiers k8s/backend-deployment.yaml et k8s/frontend-deployment.yaml.
+Modifiez les fichiers suivants :
 
-Remplacez le nom par "backend-service:latest" et "frontend-service:latest".
+- `k8s/backend-deployment.yaml`
+- `k8s/frontend-deployment.yaml`
 
-Securite et Resilience
+Remplacez la ligne `image:` par :
 
-Persistance (PVC)
+```yaml
+# Backend
+image: backend-service:latest
 
-Le systeme separe le calcul du stockage via un Persistent Volume Claim (PVC). Meme si le Pod MySQL est supprime, les donnees restent sur le disque et sont reconnectees au nouveau Pod.
+# Frontend
+image: frontend-service:latest
+```
 
-Securisation du Cluster (RBAC)
+---
 
-Mise en place du principe du moindre privilege via un ServiceAccount dedie (soc-viewer-sa).
+## 🔐 Sécurité et résilience
 
-Verification des droits RBAC :
+### 💾 Persistance des données (PVC)
 
-# Lecture autorisee (Attendu: yes)
-kubectl auth can-i get pods --as=system:serviceaccount:default:soc-viewer-sa
+Le système sépare **calcul** et **stockage** via un `Persistent Volume Claim`. Même si le Pod MySQL est supprimé ou redémarré, les données restent sur le disque et sont automatiquement reconnectées au nouveau Pod.
 
-# Suppression interdite (Attendu: no)
-kubectl auth can-i delete pods --as=system:serviceaccount:default:soc-viewer-sa
+```
+[ Pod MySQL supprimé ] ──▶ [ Données toujours sur le PVC ] ──▶ [ Nouveau Pod reconnecté ✅ ]
+```
 
+---
 
-Acces final : http://localhost
+### 🛡️ Contrôle d'accès RBAC
+
+Application du **principe du moindre privilège** via un `ServiceAccount` dédié : `soc-viewer-sa`.
+
+#### Vérification des droits
+
+```bash
+# ✅ Lecture autorisée (résultat attendu : yes)
+kubectl auth can-i get pods \
+  --as=system:serviceaccount:default:soc-viewer-sa
+
+# ❌ Suppression interdite (résultat attendu : no)
+kubectl auth can-i delete pods \
+  --as=system:serviceaccount:default:soc-viewer-sa
+```
+
+---
+
+## 🌐 Accès à l'application
+
+Une fois `minikube tunnel` lancé, ouvrez votre navigateur :
+
+```
+http://localhost
+```
+
+---
+
+<div align="center">
+
+Développé avec ❤️ par **Chahrazed Bouacida**
+
+</div>
