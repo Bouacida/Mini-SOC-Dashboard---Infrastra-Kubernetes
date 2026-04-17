@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: backend-service:latest 
-        imagePullPolicy: Never
+        image: chahrazedbouacida/backend-soc:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
 ---

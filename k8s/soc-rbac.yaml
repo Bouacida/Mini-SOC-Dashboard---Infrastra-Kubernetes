@@ -1,0 +1,28 @@
+# 1. Identité : Un compte de service dédié pour le SOC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: soc-viewer-sa
+---
+# 2. Rôle : Définit ce qu'il a le droit de faire (Lecture seule)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: soc-reader-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "pods/log"]
+  verbs: ["get", "list", "watch"]
+---
+# 3. Liaison : Attache le rôle au compte de service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: soc-read-binding
+subjects:
+- kind: ServiceAccount
+  name: soc-viewer-sa
+roleRef:
+  kind: Role
+  name: soc-reader-role
+  apiGroup: rbac.authorization.k8s.io

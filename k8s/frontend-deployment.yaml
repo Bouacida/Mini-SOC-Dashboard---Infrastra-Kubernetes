@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: frontend-service:latest 
-        imagePullPolicy: Never
+        image: chahrazedbouacida/frontend-soc:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 80 # Port standard pour NGINX servant du HTML/JS
 ---
